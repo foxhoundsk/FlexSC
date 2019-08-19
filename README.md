@@ -51,7 +51,7 @@ The repo was originally downloaded from splasky/flexsc ([c69213](https://github.
 TODO
 
 ## Acknowledgement
-@afcidk - discussing implementation of FlexSC
-@Livio Soares - giving such concepte to execute syscall
-@splasky - providing prototype of FlexSC
-@jserv - giving consultant of FlexSC
+- @afcidk - discussing implementation of FlexSC
+- @Livio Soares - giving such concepte to execute syscall
+- @splasky - providing prototype of FlexSC
+- @jserv - giving consultant of FlexSC
