@@ -1,0 +1,1 @@
+struct flexsc_sysentry;

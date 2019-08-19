@@ -1,0 +1,10 @@
+include/linux/workqueue.h
+    :253
+        add customize init macro for FlexSC work
+
+    :111
+        add pointer of flexsc sysentry and pointer of pt_regs to the work struct
+
+arch/x86/entry/syscalls/syscall_64.tbl
+    :350
+        add flexSC register and exit syscall to the syscall table
