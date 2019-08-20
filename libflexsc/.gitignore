@@ -1,6 +1,3 @@
 *.png
 *.o
 .vscode/
-
-# TODO remove after update
-perf_result/
