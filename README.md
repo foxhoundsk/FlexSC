@@ -50,9 +50,9 @@ The repo was originally downloaded from splasky/flexsc ([c69213](https://github.
 ## Analysis
 The following results are done with 7 kthreads (kernel cpu) and 1 kernel-visible thread (user cpu) on 8th-gen Intel CPU (8350U) with HyperThreading enabled (4C8T).
 
-![Screen](libflexsc/perf_result/write.png)
+![Screen](./libflexsc/perf_result/write.png)
 
-![Screen](libflexsc/perf_result/getpid.png)
+![Screen](./libflexsc/perf_result/getpid.png)
 ### Conclusion
 It's been 10 years since FlexSC released, computer organization may changed a lot (e.g. CPU mode switch in modern processor takes only <50ns within a round trip). Therefore, even FlexSC doesn't has better performance than typical syscall, this is still a record which shows that imporvements of cache locality and mode switch can't still beats the time cost of typical syscall. Or, there exists some overheads within my implementation of FlexSC, feel free to open a issue if you find out anything. Thank you!
 
