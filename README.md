@@ -1,4 +1,4 @@
-# FlexSC Implementation on Linux Kernel v5.0+ and Performance Analysis
+# Implementation of FlexSC on Linux Kernel v5.0+ and Performance Analysis
 
 ## FlexSC
 FlexSC (Flexible System Call), a mechanism to executing system call, which was introduced on [OSDI'10](https://www.usenix.org/conference/osdi10/flexsc-flexible-system-call-scheduling-exception-less-system-calls) by Livio Soares.
