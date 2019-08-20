@@ -6,11 +6,13 @@ FlexSC (Flexible System Call), a mechanism to executing system call, which was i
 The main concept of FlexSC is processing syscalls in batching way, which has better cache locality and almost no CPU mode switch involved. For more details, the link above has link to the paper. Also, you can refer to my porting note at [HackMD](https://hackmd.io/@flawless0714/S1Wdf-g0V).
 
 ## How Syscall Being Processed by FlexSC
-Syscall are processed through the following steps:
+Syscalls are processed through the following steps:
 
-1. The moment syscall being requested by user thread, it simply submit a syscall entry
+1. The moment syscall being requested by user thread, it simply grab a free syscall entry, and submit (change the state of the entry) it after done population of syscall-related argument to the entry
 2. Once there are no free entries, the kernel visible thread start submitting (by marking syscall entry to different state) the entries to kthread
-3. kthread detects that it has stuff to do (by scanning syscall entries), then it start queuing work to CMWQ workqueue
+3. Kthread detects that it has stuff to do (by scanning syscall entries), then it start queuing work to the CMWQ workqueue
+4. After the work (syscall) is done, kthread change the state of the syscall entry
+5. Library of FlexSC (user space) detects that the syscall is done, it simply return the retval of the syscall to user thread
 
 The following is the illustration of FlexSC:
 ```
