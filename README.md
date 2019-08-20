@@ -8,11 +8,11 @@ The main concept of FlexSC is processing syscalls in batching way, which has bet
 ## How Syscall Being Processed by FlexSC
 Syscalls are processed through the following steps:
 
-1. The moment syscall being requested by user thread, it simply grab a free syscall entry, and submit (change the state of the entry) it after done population of syscall-related argument to the entry
+1. The moment syscall being requested by user thread, it simply grab a free syscall entry, and submit (change the state of the entry) it after done population of syscall-related arguments to the entry
 2. Once there are no free entries, the kernel visible thread start submitting (by marking syscall entry to different state) the entries to kthread
-3. Kthread detects that it has stuff to do (by scanning syscall entries), then it start queuing work to the CMWQ workqueue
+3. Kthread detects that it got stuff to do (by scanning syscall entries), then it start queuing work to the CMWQ workqueue
 4. After the work (syscall) is done, kthread change the state of the syscall entry
-5. Library of FlexSC (user space) detects that the syscall is done, it simply return the retval of the syscall to user thread
+5. Library of FlexSC (user space) detects that the syscall is done, it simply return the retval of the syscall to application thread
 
 The following is the illustration of FlexSC:
 ```
