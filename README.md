@@ -58,6 +58,10 @@ The following results are done with 7 kthreads (kernel cpu) and 1 kernel-visible
 ### Conclusion
 It's been 10 years since FlexSC released, computer organization may changed a lot (e.g. CPU mode switch in modern processor takes only <50ns within a round trip). Therefore, even FlexSC doesn't has better performance than typical syscall, this is still a record which shows that imporvements of cache locality and mode switch can't still beats the time cost of typical syscall. Or, there exists some overheads within my implementation of FlexSC, feel free to open a issue if you find out anything. Thank you!
 
+## Known Issues
+
+- On exit of kthreads, oops and panic will occur. It's harmless to the test since the result is forced to flush before calling of exit of FlexSC.
+
 ## Acknowledgement
 - @[afcidk](https://github.com/afcidk) - Discussing implementation of FlexSC
 - @Livio Soares - Giving such concept to execute syscall
