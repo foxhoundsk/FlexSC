@@ -30,8 +30,7 @@ int fd_perf;
 
 static inline long get_diff_timespec_ns(struct timespec *start, struct timespec *end)
 {
-    return ((end->tv_sec - start->tv_sec) * ((long) 1e9)) + (end->tv_nsec - start->tv_nsec < 0 ? \
-           ((end->tv_nsec - start->tv_nsec) - ((long) -1e9)) : (end->tv_nsec - start->tv_nsec));
+    return ((end->tv_sec - start->tv_sec) * ((long) 1e9)) + end->tv_nsec - start->tv_nsec;
 }
 
 void *worker(void *arg)
