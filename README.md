@@ -54,9 +54,9 @@ The following analysis are done with 7 kthreads (kernel cpu) and 1 kernel-visibl
 
 - write() syscall:
 
-    - Execution time:
-        ![Screen](./libflexsc/perf_result/write.png)
-
+    - Execution time:                 
+    ![Screen](./libflexsc/perf_result/write.png)
+    
     - Time elapsed for finding marked syscall entry (starts from the time the entry being marked as `FLEXSC_STATUS_MARKED`):
     ![Screen](./libflexsc/perf_result/find_marked_syspage_elapsed_time.png)
 
@@ -73,8 +73,8 @@ The following analysis are done with 7 kthreads (kernel cpu) and 1 kernel-visibl
     Summing analysis above, we might only optimize FlexSC to having similar result as typical syscall mechanism in the end, because processing syscall (write) in CMWQ costs ~500ns, summing it with other costs might lead to same consequence as I just mentioned.
 
 - getpid() syscall:
-    - Execution time:
-    ![Screen](./libflexsc/perf_result/getpid.png)
+    - Execution time:           
+     ![Screen](./libflexsc/perf_result/getpid.png)
 
 ### Conclusion
 It's been 10 years since FlexSC released, computer organization may changed a lot (e.g. [CPU mode switch in modern processor takes only <50ns within a round trip](https://i.imgur.com/bfgu0EK.png)). Therefore, even FlexSC doesn't has better performance than typical syscall, this is still a record which shows that imporvements of cache locality and mode switch can't still beats the time cost of typical syscall. Or, there exists some overheads within my implementation of FlexSC, feel free to open a issue if you find out anything. Thank you!
