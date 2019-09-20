@@ -57,8 +57,10 @@ The following analysis are done with 7 kthreads (kernel cpu) and 1 kernel-visibl
     - Execution time:                 
     ![Screen](./libflexsc/perf_result/write.png)
     
-    - Time elapsed for finding marked syscall entry (starts from the time the entry being marked as `FLEXSC_STATUS_MARKED`):
+    - Time elapsed for finding marked syscall entry (starts from the time the entry being marked as `FLEXSC_STATUS_MARKED`): 
     ![Screen](./libflexsc/perf_result/find_marked_syspage_elapsed_time.png)
+    
+    (you may figure that `thread no.` of FlexSC has ~2xx offset compare to the normal one, they have same meaning actually. It's because of I use `gettid()` for thread no. instead of order of thread creation which normal one uses.)
 
     - Time elapsed for library of FlexSC to find free syscall entry:
     ![Screen](./libflexsc/perf_result/get_free_syspage_elapsed_time.png)
