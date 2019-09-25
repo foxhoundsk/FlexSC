@@ -47,10 +47,13 @@ The repo was originally downloaded from splasky/flexsc ([c69213](https://github.
 - performance measurement program (write() and getpid() syscall)
 - func of kthread
 - mechanism to get free syscall entry
-- allocation of CMWQ workqueue and work
+- allocation of CMWQ (Concurrency Managed Workqueue) and its work
+
+**Currently**, `flexsc.c` at `libflexsc/` and `linux-5.0.10/flexsc/` having some hard-coded section which used to test `write()`, a clearer can be found at [here](https://github.com/flawless0714/FlexSC/blob/master/libflexsc/versions/per_kthread_getpid/flexsc.c) (library) and [here](https://github.com/flawless0714/FlexSC/blob/master/linux-5.0.10/flexsc/versions/per_kthread_getpid/flexsc.c) (kernel code).
+
 
 ## Analysis
-The following analysis are done with 7 kthreads (kernel cpu) and 1 kernel-visible thread (user cpu) on 8th-gen Intel CPU (i5-8350U) with HyperThreading enabled (4C8T).
+The following analysis are done with 7 kthreads (kernel cpu, each kthread handling its own works of CMWQ) and 1 kernel-visible thread (user cpu) on 8th-gen Intel CPU (i5-8350U) with HyperThreading enabled (4C8T).
 
 - write() syscall:
 
@@ -81,9 +84,16 @@ The following analysis are done with 7 kthreads (kernel cpu) and 1 kernel-visibl
 ### Conclusion
 It's been 10 years since FlexSC released, computer organization may changed a lot (e.g. [CPU mode switch in modern processor takes only <50ns within a round trip](https://i.imgur.com/bfgu0EK.png)). Therefore, even FlexSC doesn't has better performance than typical syscall, this is still a record which shows that imporvements of cache locality and mode switch can't still beats the time cost of typical syscall. Or, there exists some overheads within my implementation of FlexSC, feel free to open a issue if you find out anything. Thank you!
 
-## Known Issues
+## Usage
+For library, you can `$ make` directly after you've done modification of the code, I have pre-defined some macro in the Makefile, hence single `$ make` command can produce executables for testing typical syscall and FlexSC syscall.
 
-- On exit of kthreads, oops and panic will occur. It's harmless to the test since the result is forced to flush before calling of exit of FlexSC.
+For FlexSC flavored kernel, I've added `.config` file for kernel build, you can use `$ make bzImage` to compile the kernel directly if your machine have already meet the requirement of compiling Linux kernel.
+
+## TODO 
+- (proposed by @afcidk) Find a policy to make user process to sleep during processing of requested syscalls, and wake up the process (maybe by signal) once the process is done. This is in order to reduce time elapsed by processing syscalls. Since user process  is busy-waiting (by using `pthread_yield()`, we've tried `pthread_cond_wait()`, but it's worser than `pthread_yield()`, might caused by my implementation) for the result of syscall, we want to test if putting them to sleep shows better performance. Moreover, I've noticed that syscall page (we have 64 * 7-cpu => 448) are not all exhausted by user process, this should also take into the consideration.
+
+## Known Issues
+- On exit of test program (calling `flexsc_exit()`), oops and panic will occur since the cleanup is not done correctly. It's harmless to the test since the result file is forced to flush before calling of exit of FlexSC. The workround is restart the QEMU if you are running on QEMU.
 
 ## Acknowledgement
 - @[afcidk](https://github.com/afcidk) - Discussing implementation of FlexSC
