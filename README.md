@@ -49,7 +49,7 @@ The repo was originally downloaded from splasky/flexsc ([c69213](https://github.
 - mechanism to get free syscall entry
 - allocation of CMWQ (Concurrency Managed Workqueue) and its work
 
-**Currently**, `flexsc.c` at `libflexsc/` and `linux-5.0.10/flexsc/` having some hard-coded section which used to test `write()`, a clearer can be found at [here](https://github.com/flawless0714/FlexSC/blob/master/libflexsc/versions/per_kthread_getpid/flexsc.c) (library) and [here](https://github.com/flawless0714/FlexSC/blob/master/linux-5.0.10/flexsc/versions/per_kthread_getpid/flexsc.c) (kernel code).
+**Currently**, `flexsc.c` at `libflexsc/` and `linux-5.0.10/flexsc/` having some hard-coded section which used to test `write()` syscall, a clearer version can be found at [here](https://github.com/flawless0714/FlexSC/blob/master/libflexsc/versions/per_kthread_getpid/flexsc.c) (library) and [here](https://github.com/flawless0714/FlexSC/blob/master/linux-5.0.10/flexsc/versions/per_kthread_getpid/flexsc.c) (kernel code).
 
 
 ## Analysis
