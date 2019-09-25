@@ -85,7 +85,7 @@ The following analysis are done with 7 kthreads (kernel cpu, each kthread handli
 It's been 10 years since FlexSC released, computer organization may changed a lot (e.g. [CPU mode switch in modern processor takes only <50ns within a round trip](https://i.imgur.com/bfgu0EK.png)). Therefore, even FlexSC doesn't has better performance than typical syscall, this is still a record which shows that imporvements of cache locality and mode switch can't still beats the time cost of typical syscall. Or, there exists some overheads within my implementation of FlexSC, feel free to open a issue if you find out anything. Thank you!
 
 ## Usage
-For library, you can `$ make` directly after you've done modification of the code, I have pre-defined some macro in the Makefile, hence single `$ make` command can produce executables for testing typical syscall and FlexSC syscall.
+For library, you can `$ make` directly after you've done modification of the code, I have pre-defined macros in the Makefile, hence single `$ make` command will produce two executables for testing typical syscall and FlexSC syscall respectively.
 
 For FlexSC flavored kernel, I've added `.config` file for kernel build, you can use `$ make bzImage` to compile the kernel directly if your machine have already meet the requirement of compiling Linux kernel.
 
