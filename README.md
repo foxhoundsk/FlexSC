@@ -68,13 +68,6 @@ The following analysis are done with 7 kthreads (kernel cpu, each kthread handli
     - Time elapsed for library of FlexSC to find free syscall entry:
     ![Screen](./libflexsc/perf_result/get_free_syspage_elapsed_time.png)
 
-    - Time elapsed for application thread to wait for completion of syscall after the library submitted syscall entry (marked as `FLEXSC_STATUS_SUBMITTED`:
-    ![Screen](./libflexsc/perf_result/pthread_yield_elapsed_time.png)
-
-    As you can see, the last result plays most part of the execution time. We use `pthread_yield()` to implement it, this is not a good practice, since application threads which is waiting on completion of requested syscall will keep checking if it has completed each time the time slice is dispatched to the thread.
-
-    To addressing this issue, we can use `pthread_cond_wait()` and `pthread_cond_signal()` to make sure application threads are only wake up at completion of syscall. However, I've implemented a similar (a bit similar..) mechanism, even though it uses `pthread_cond_wait()`, but it uses `pthread_cond_broadcast()` to wake up application threads, which turns out has worser performance than `pthread_yield()` style implementation. Nevertheless, we can try using `pthread_cond_signal()` to implement a more efficient waiting mechanism.
-        
     Summing analysis above, we might only optimize FlexSC to having similar result as typical syscall mechanism in the end, because processing syscall (write) in CMWQ costs ~500ns, summing it with other costs might lead to same consequence as I just mentioned.
 
 - getpid() syscall:
