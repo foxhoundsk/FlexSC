@@ -1,7 +1,7 @@
 CFLAGS = -Wall -pthread
 SRC=flexsc.c flexsc_syscalls.c
 OBJ_C=$(SRC:.c=.o)
-INC=flexsc.h syscall_info.h flexsc_syscalls.h flexsc_cpu.h flexsc_types.h
+INC=flexsc.h syscall_info.h flexsc_syscalls.h flexsc_cpu.h flexsc_types.h list.h
 OBJ_H=$(INC:.h=.o) # or you can just include .h file seperately at gcc -o stage
 LIB=libflexsc.a
 LIBS= -L. -lflexsc

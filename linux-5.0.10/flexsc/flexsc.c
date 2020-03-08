@@ -621,7 +621,7 @@ static int systhread_fn(void *args)
 
             /* detect if syspage submitted, if it does, queue a work for the submitted syspage */
             if (FLEXSC_STATUS_MARKED == syspage[i].rstatus) {
-                syspage[i].rstatus = FLEXSC_STATUS_BUSY;
+                //syspage[i].rstatus = FLEXSC_STATUS_BUSY;
                 //printk(FLEXSC "kthread processing syspage! (cpu: %d)\n", cpu);
                 
                 /* according to the doc of CMWQ, we guarantee that the work is queued to specific cpu in most case */

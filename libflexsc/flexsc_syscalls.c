@@ -22,24 +22,23 @@ static inline pid_t _flexsc_getpid(void);
 
 static struct flexsc_sysentry *get_free_syscall_entry(void)
 {
+    struct entry_carrier *target;
 retry:
     pthread_spin_lock(&spin_free_entry);
 
-    for (int i = 0; i < u_info->npages; i++) {
-        if (u_info->sysentry[i].rstatus == FLEXSC_STATUS_FREE) {
-            /**
-             * change rstatus to BUSY due to the page may being robbed once the lock is released
-             * because it is not set to !FREE immediately after accquired by current thread.
-             */
-            u_info->sysentry[i].rstatus = FLEXSC_STATUS_BUSY;
-            pthread_spin_unlock(&spin_free_entry);
-            //printf("entry found (i = %d)\n", i);
-            return &u_info->sysentry[i];
-        }
-    }
-
+    if (unlikely(list_empty(&u_info->free_list)))
+        goto wait;
+    
+    /* move the entry from free_list to busy_list */
+    list_move(u_info->free_list.next, &u_info->busy_list);
+    target = list_entry(u_info->busy_list.next, struct entry_carrier, list);
+    target->entry->rstatus = FLEXSC_STATUS_BUSY;
     pthread_spin_unlock(&spin_free_entry);
-    //puts("entry not found");
+    
+    return target->entry;
+wait:
+    pthread_spin_unlock(&spin_free_entry);
+    //puts("free_entry not found");
 
 /**
  * if we have plenty of user threads waiting here, we may facing high usage issue,
@@ -47,14 +46,14 @@ retry:
  * may be the penalty of performance.
  */
     //pthread_spin_lock(&spin_user_pending); //seems this is not need, because the correctness is not affected by it
-
+/*
     if (syscall_runner == IDLE)
         syscall_runner = IN_PROGRESS;
     else if (syscall_runner == DONE) {
         puts("warning: get free syscall page at DONE state");
         syscall_runner = IN_PROGRESS;
     }
-
+*/
     //pthread_spin_unlock(&spin_user_pending);
 
     pthread_yield();
@@ -127,7 +126,7 @@ static inline ssize_t _flexsc_write(unsigned int fd, char *buf, size_t count)
     retval = entry->args[0];
 
     entry->rstatus = FLEXSC_STATUS_FREE;
-
+//puts("done work");
     return retval;
 }
 

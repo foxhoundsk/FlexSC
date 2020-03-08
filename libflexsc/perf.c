@@ -107,7 +107,7 @@ int main(void)
     }
 
     puts("done flexsc registration");
-    flexsc_start_syscall();
+   // flexsc_start_syscall();
 
 #else
     fd_perf = open("/dev/null", O_WRONLY);

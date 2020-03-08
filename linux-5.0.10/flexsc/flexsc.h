@@ -93,7 +93,10 @@ struct flexsc_sysentry {
 
 struct flexsc_init_info {
     struct flexsc_sysentry **sysentry; /* Pointer to first sysentry */
-    struct flexsc_cpuinfo cpuinfo;
+    struct list_head free_list;
+    struct list_head busy_list;
+    //struct list_head done_list;
+    struct flexsc_cpuinfo cpuinfo; /* cpu bound info */
     char *write_page; /* shared page for test write() */
     size_t npages; /* Number of Syspages */
     size_t nentry; /* # of workers should be equal to # of sysentries */

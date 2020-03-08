@@ -68,40 +68,32 @@ static void __flexsc_register(struct flexsc_init_info *info)
  */
 static void *kv_thread_worker(void *arg)
 {
-    /* after test, using interval syspg_num doesn't have better performance than having all kv_threads scanning from start-end of syspages */
-    struct kv_handle_syspg_num *handle_tmp = (struct kv_handle_syspg_num*) arg;
+    struct entry_carrier *target, *buf;
 
-    /* copy to per-thread context */
-    int start = handle_tmp->start;
-    int end = handle_tmp->end;
-    int idx;
-
-    /**
-     * syscall_runner is set by flexsc_syscall_start or when syspage is full,
-     * once it's set, we start marking (marked syspage is processed ASAP) the
-     * sumbitted syspage. As long as there exist at least one syspage is done,
-     * we wake up waiting threads
-     */
     while (1) {
-        pthread_spin_lock(&spin_user_pending);
-        if (likely(syscall_runner == IN_PROGRESS)) {
-            //puts("kv_thread: syscall runner is still IN_PROGRESS");
-            pthread_spin_unlock(&spin_user_pending);
+        pthread_spin_lock(&spin_free_entry);
 
-            for (idx = 0; idx < u_info->npages; idx++) {
-                //printf("current idx of kv_thread is: %d\n", idx);
-                if (u_info->sysentry[idx].rstatus == FLEXSC_STATUS_SUBMITTED)
-                    u_info->sysentry[idx].rstatus = FLEXSC_STATUS_MARKED;                    
-                else if (u_info->sysentry[idx].rstatus == FLEXSC_STATUS_DONE)
-                    pthread_cond_broadcast(&user_wait); /* application threads wait on this cond (SOME SYSCALL ONLY BUSYWAITING, WHICH MEANS THEY DON'T NEED THIS)*/
+        if (likely(!list_empty(&u_info->busy_list)))
+            list_for_each_entry_safe(target, buf, &u_info->busy_list, list) {
+                if (FLEXSC_STATUS_SUBMITTED == target->entry->rstatus)
+                    target->entry->rstatus = FLEXSC_STATUS_MARKED;
+                else if (FLEXSC_STATUS_FREE == target->entry->rstatus) {
+                    list_move(&target->list, &u_info->free_list);
+                }
+                
             }
+        
+        /* we should use pthread_cond_signal, which may save us more resources */
+        //pthread_cond_broadcast(&user_wait);
+/*
+        while (!list_empty(&u_info->done_list))
+            list_for_each_entry(target, &u_info->done_list, list)
+                target->entry->rstatus = FLEXSC_STATUS_DONE;
+  */      
+        pthread_spin_unlock(&spin_free_entry);
 
-            goto restart; /* calling pthread_spin_unlock twice is undefined-behavior */
-        }
+        //pthread_cond_broadcast(&user_wait); needed if we use cond wait
 
-        pthread_spin_unlock(&spin_user_pending);
-/* after test, jump to here won't make a notable performance penalty, if it does, we should use continue; in the context of if statement above */
-restart:
         pthread_yield();
     }
 
@@ -196,8 +188,10 @@ static int init_map_syspage(struct flexsc_init_info *info)
      * will set array of args properly, so there is nothing to worry about.
      */
     entry = (struct flexsc_sysentry*) aligned_alloc(pgsize, total);
-    if (!entry)
+    if (!entry){
+        perror("entry");
         return FLEXSC_ERR_INIT;
+    }
 
     for (int i = 0; i < info->npages; i++) {
         entry[i].rstatus = FLEXSC_STATUS_FREE;
@@ -215,7 +209,15 @@ static int init_map_syspage(struct flexsc_init_info *info)
     info->sysentry = entry;
     info->total_bytes = total;
 
-    /* print_sysentry(&(info->sysentry[0])); */
+    struct entry_carrier *carrier = aligned_alloc(pgsize, sizeof(struct entry_carrier) * info->npages);
+    if (!carrier) {
+        perror("carrier");
+        return FLEXSC_ERR_INIT;
+    }
+    for (int i = 0; i < info->npages; i++) {
+        carrier[i].entry = &entry[i];
+        list_add(&carrier[i].list, &info->free_list);
+    }
 
     return 0;
 }
@@ -284,6 +286,11 @@ flexsc_register(struct flexsc_init_info *info)
     }
 
     u_info = info;
+
+    INIT_LIST_HEAD(&u_info->free_list);
+    INIT_LIST_HEAD(&u_info->busy_list);
+    //INIT_LIST_HEAD(&u_info->done_list);
+
     printf("about to syscall with addr: %p (:%d)\n", u_info, __LINE__);
 
     if (FLEXSC_ERR_INIT == init_info(u_info))
@@ -388,6 +395,8 @@ static void create_kv_thread(struct flexsc_init_info *info)
         kv_handle_tmp[idx].end = (remain == 1) ? 1: remain - 1;
     }
 
+    pthread_create(&(kv_thread_tmp->tid), NULL, kv_thread_worker, NULL);
+/*
     for (idx = 0, kv_thread_tmp = &kv_thread_list;;) {
         printf("debug: start and end of idx of kv_thread is: %lu, %lu\n", kv_handle_tmp[idx].start, kv_handle_tmp[idx].end);
 
@@ -395,10 +404,11 @@ static void create_kv_thread(struct flexsc_init_info *info)
         if (++idx < cpu_qnt)
             kv_thread_tmp = kv_thread_tmp->next;
         else {
-            kv_thread_tmp->next = NULL; /* make sure last element has its `next` NULL */
+            kv_thread_tmp->next = NULL; // make sure last element has its `next` NULL
             break;
         }
     }
+*/
 }
 
 static inline int user_lock_init(void)

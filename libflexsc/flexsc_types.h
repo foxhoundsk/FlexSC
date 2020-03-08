@@ -6,6 +6,8 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+#include "list.h"
+
 #define SYSCALL_FLEXSC_REGISTER 400
 #define SYSCALL_FLEXSC_EXIT 401
 
@@ -42,8 +44,16 @@ struct flexsc_sysentry {
     long args[6];
 } ____cacheline_aligned_in_smp;
 
+struct entry_carrier {
+    struct list_head list;
+    struct flexsc_sysentry *entry;
+};
+
 struct flexsc_init_info {
     struct flexsc_sysentry *sysentry; /* Pointer to first sysentry */
+    struct list_head free_list;
+    struct list_head busy_list;
+    //struct list_head done_list;
     struct flexsc_cpuinfo cpuinfo; /* cpu bound info */
     char *write_page; /* shared page for test write() */
     size_t npages; /* Number of Syspages */
